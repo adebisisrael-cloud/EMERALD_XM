@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>NVIDIA Free AI Chat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; }
+    #chat-box { height: 70vh; border: 1px solid #ddd; padding: 1rem; overflow-y: auto; margin-bottom: 1rem; }
+    .user { background: #e3f2fd; padding: 0.5rem; border-radius: 10px; margin: 0.5rem 0; }
+    .ai { background: #f5f5f5; padding: 0.5rem; border-radius: 10px; margin: 0.5rem 0; }
+    #input-container { display: flex; gap: 0.5rem; }
+    #user-input { flex: 1; padding: 0.5rem; }
+    #send-btn { padding: 0.5rem 1rem; }
+  </style>
+</head>
+<body>
+  <h1>💬 NVIDIA Free AI Chat (Llama 3 8B)</h1>
+  <div id="chat-box"></div>
+  <div id="input-container">
+    <input type="text" id="user-input" placeholder="Ask me anything..." />
+    <button id="send-btn">Send</button>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById('chat-box');
+    const userInput = document.getElementById('user-input');
+    const sendBtn = document.getElementById('send-btn');
+
+    function addMessage(text, isUser) {
+      const div = document.createElement('div');
+      div.className = isUser ? 'user' : 'ai';
+      div.textContent = text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    sendBtn.onclick = async () => {
+      const prompt = userInput.value.trim();
+      if (!prompt) return;
+      addMessage(prompt, true);
+      userInput.value = '';
+      sendBtn.disabled = true;
+      userInput.placeholder = 'Thinking...';
+
+      try {
+        const response = await fetch('/.netlify/functions/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt })
+        });
+        const data = await response.json();
+        addMessage(data.response || 'Error: No response', false);
+      } catch (err) {
+        addMessage(`Error: ${err.message}`, false);
+      } finally {
+        sendBtn.disabled = false;
+        userInput.placeholder = 'Ask me anything...';
+        userInput.focus();
+      }
+    };
+
+    userInput.addEventListener('keypress', e => {
+      if (e.key === 'Enter') sendBtn.click();
+    });
+  </script>
+</body>
+</html>
