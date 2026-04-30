@@ -1,5 +1,6 @@
 // 🔑 REPLACE THIS WITH YOUR KEY FROM build.nvidia.com (STEP 2 ABOVE)
-const NVIDIA_API_KEY = "nvapi-your-actual-key-here"; 
+// REPLACE THE HARDCODDED LINE WITH THIS:
+const NVIDIA_API_KEY = process.env.NVIDIA_API_KEY;  // ← SAFE! Netlify injects this at runtime
 
 exports.handler = async (event) => {
   try {
